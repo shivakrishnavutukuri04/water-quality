@@ -1,43 +1,70 @@
 import streamlit as st
 import numpy as np
 import pickle
+import base64
+from pathlib import Path
 
-# =========================================================
-# AQUA // WATER QUALITY INTELLIGENCE
-# New visual concept:
-# Editorial water experience + scientific analysis console
-# Original model logic is preserved.
-# =========================================================
+# ============================================================
+# AQUA / WATER QUALITY ANALYSIS
+# Visual direction:
+# Editorial environmental website + scientific analysis tool
+#
+# Original ML pipeline is intentionally preserved.
+# ============================================================
 
 st.set_page_config(
-    page_title="AQUA // Water Quality Intelligence",
+    page_title="AQUA — Water Quality Analysis",
     page_icon="💧",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-# ---------------------------------------------------------
-# MODEL — KEEPING YOUR ORIGINAL PREDICTION PIPELINE
-# ---------------------------------------------------------
-with open("svm_water_quality_model.pkl", "rb") as model_file:
+BASE_DIR = Path(__file__).resolve().parent
+ASSET_DIR = BASE_DIR / "assets"
+
+HERO_IMAGE = ASSET_DIR / "water_testing_hero.jpg"
+PROBLEM_IMAGE = ASSET_DIR / "water_access_problem.jpg"
+
+def image_data_uri(path: Path) -> str:
+    """Embed local image assets directly into the Streamlit HTML."""
+    mime = "image/jpeg"
+    encoded = base64.b64encode(path.read_bytes()).decode("ascii")
+    return f"data:{mime};base64,{encoded}"
+
+# ------------------------------------------------------------
+# MODEL — ORIGINAL LOGIC PRESERVED
+# ------------------------------------------------------------
+with open(BASE_DIR / "svm_water_quality_model.pkl", "rb") as model_file:
     model = pickle.load(model_file)
 
 
-# ---------------------------------------------------------
-# DESIGN SYSTEM
-# ---------------------------------------------------------
+# ------------------------------------------------------------
+# GLOBAL DESIGN
+# ------------------------------------------------------------
 st.markdown(
     """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
-    * {
-        box-sizing: border-box;
+    :root {
+        --ink: #0a1719;
+        --deep: #082b32;
+        --water: #0e5661;
+        --aqua: #70e1d7;
+        --foam: #eefaf7;
+        --sand: #d8c9aa;
+        --muted: #71888a;
+        --line: rgba(10, 23, 25, .12);
+        --white: #ffffff;
+        --danger: #c75b51;
+        --safe: #247d68;
     }
 
+    * { box-sizing: border-box; }
+
     .stApp {
-        background: #071b20;
-        color: #f3fbfa;
+        background: #f4f0e7;
+        color: var(--ink);
         font-family: 'DM Sans', sans-serif;
     }
 
@@ -50,711 +77,633 @@ st.markdown(
     }
 
     .block-container {
-        max-width: 1440px;
-        padding: 0 0 80px 0;
+        max-width: 1480px;
+        padding: 0 0 80px;
     }
 
-    /* =====================================================
-       HERO
-       ===================================================== */
+    /* Hide Streamlit's empty top spacing */
+    .main .block-container {
+        padding-top: 0;
+    }
+
+    /* ========================================================
+       TOP NAV
+       ======================================================== */
+
+    .nav-wrap {
+        height: 72px;
+        padding: 0 5vw;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(244,240,231,.94);
+        border-bottom: 1px solid rgba(10,23,25,.08);
+        position: relative;
+        z-index: 10;
+    }
+
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: .18em;
+    }
+
+    .brand-mark {
+        width: 27px;
+        height: 27px;
+        border: 1.5px solid #0c777a;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #0c777a;
+        font-size: 12px;
+    }
+
+    .nav-right {
+        display: flex;
+        gap: 30px;
+        color: #617476;
+        font-size: 9px;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+    }
+
+    /* ========================================================
+       HERO — REAL WATER TESTING IMAGE
+       ======================================================== */
 
     .hero {
         position: relative;
         min-height: 720px;
         overflow: hidden;
-        padding: 34px 6vw 60px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-
-        background:
-            radial-gradient(circle at 72% 30%, rgba(79,220,214,.20), transparent 17%),
-            radial-gradient(circle at 35% 70%, rgba(23,112,125,.22), transparent 26%),
-            linear-gradient(180deg, #07191e 0%, #0a3038 57%, #071b20 100%);
+        background: #0a292f;
     }
 
-    /* water surface lines */
-    .hero::before {
-        content: "";
+    .hero-photo {
         position: absolute;
         inset: 0;
-        opacity: .30;
-        background:
-            repeating-radial-gradient(
-                ellipse at 50% 110%,
-                transparent 0 24px,
-                rgba(175,255,248,.10) 25px 26px,
-                transparent 27px 48px
-            );
-        transform: perspective(500px) rotateX(55deg) scale(1.6);
-        transform-origin: center bottom;
-        pointer-events: none;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        filter: saturate(.82) contrast(1.03);
     }
 
-    .hero::after {
-        content: "";
+    .hero-overlay {
         position: absolute;
-        width: 620px;
-        height: 620px;
-        right: -150px;
-        top: 70px;
-        border-radius: 50%;
+        inset: 0;
         background:
-            radial-gradient(
-                circle at 36% 27%,
-                rgba(255,255,255,.55) 0 1.5%,
-                transparent 2%
-            ),
-            radial-gradient(
-                circle at 42% 34%,
-                rgba(255,255,255,.15),
-                transparent 24%
-            ),
-            radial-gradient(
-                circle,
-                rgba(92,229,220,.20),
-                rgba(92,229,220,.03) 44%,
-                transparent 69%
-            );
-        border: 1px solid rgba(169,255,249,.13);
-        box-shadow:
-            inset -45px -50px 80px rgba(0,0,0,.25),
-            0 0 100px rgba(73,224,215,.08);
-        pointer-events: none;
-    }
-
-    .topbar {
-        position: relative;
-        z-index: 5;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-size: 10px;
-        letter-spacing: .20em;
-        text-transform: uppercase;
-    }
-
-    .logo {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-family: 'Space Grotesk', sans-serif;
-        font-weight: 700;
-        letter-spacing: .22em;
-    }
-
-    .logo-dot {
-        width: 28px;
-        height: 28px;
-        border: 1px solid rgba(147,255,247,.65);
-        border-radius: 50%;
-        display: grid;
-        place-items: center;
-        color: #8ef4ec;
-        font-size: 12px;
-    }
-
-    .top-status {
-        color: #7e9b9f;
+            linear-gradient(90deg, rgba(5,28,32,.93) 0%, rgba(5,28,32,.76) 43%, rgba(5,28,32,.16) 78%),
+            linear-gradient(180deg, rgba(4,24,28,.48), rgba(4,24,28,.16) 45%, rgba(4,24,28,.68));
     }
 
     .hero-content {
         position: relative;
-        z-index: 4;
-        max-width: 900px;
-        margin-top: 90px;
+        z-index: 2;
+        padding: 105px 7vw 70px;
+        max-width: 950px;
     }
 
-    .hero-kicker {
-        color: #79e8df;
-        font-size: 11px;
+    .hero-eyebrow {
+        color: #b7eee7;
+        font-size: 10px;
         font-weight: 700;
-        letter-spacing: .30em;
+        letter-spacing: .28em;
         text-transform: uppercase;
-        margin-bottom: 24px;
+        margin-bottom: 25px;
     }
 
     .hero-title {
+        margin: 0;
         font-family: 'Space Grotesk', sans-serif;
-        font-size: clamp(64px, 10vw, 142px);
+        font-size: clamp(62px, 8vw, 126px);
         line-height: .82;
         letter-spacing: -.075em;
+        color: white;
         font-weight: 700;
-        margin: 0;
     }
 
-    .hero-title .outline {
-        color: transparent;
-        -webkit-text-stroke: 1px rgba(234,255,253,.55);
+    .hero-title .thin {
+        color: rgba(255,255,255,.68);
+        font-weight: 400;
     }
 
-    .hero-title .aqua {
-        color: #75e9e1;
+    .hero-title .accent {
+        color: #76e4da;
     }
 
-    .hero-description {
-        max-width: 610px;
-        margin-top: 34px;
-        color: #9ab4b7;
+    .hero-copy {
+        max-width: 590px;
+        color: rgba(238,250,247,.75);
         font-size: 14px;
         line-height: 1.85;
+        margin-top: 32px;
     }
 
-    .hero-bottom {
-        position: relative;
-        z-index: 5;
+    .hero-rule {
+        width: 70px;
+        height: 1px;
+        background: #76e4da;
+        margin-top: 38px;
+    }
+
+    .hero-meta {
         display: flex;
-        align-items: end;
-        justify-content: space-between;
-        gap: 30px;
-        margin-top: 80px;
+        gap: 38px;
+        margin-top: 24px;
+        flex-wrap: wrap;
     }
 
-    .scroll-note {
-        color: #668489;
-        font-size: 10px;
+    .hero-meta-item {
+        color: rgba(238,250,247,.62);
+        font-size: 9px;
+        letter-spacing: .15em;
+        text-transform: uppercase;
+    }
+
+    .hero-meta-item strong {
+        display: block;
+        color: white;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 20px;
+        letter-spacing: -.02em;
+        margin-bottom: 4px;
+    }
+
+    .hero-side {
+        position: absolute;
+        z-index: 3;
+        right: 5vw;
+        bottom: 46px;
+        color: rgba(255,255,255,.66);
+        font-size: 9px;
         letter-spacing: .20em;
         text-transform: uppercase;
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
     }
 
-    .hero-index {
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: 12px;
-        color: #6f898d;
-        letter-spacing: .15em;
-    }
-
-    .hero-index strong {
-        color: #eefcfb;
-        font-size: 28px;
-    }
-
-    /* floating data chips */
-    .data-chip {
-        position: absolute;
-        z-index: 6;
-        border: 1px solid rgba(187,255,250,.16);
-        background: rgba(5,25,30,.48);
-        backdrop-filter: blur(14px);
-        border-radius: 13px;
-        padding: 12px 15px;
-        min-width: 118px;
-        box-shadow: 0 20px 50px rgba(0,0,0,.18);
-    }
-
-    .chip-a {
-        right: 12%;
-        bottom: 145px;
-    }
-
-    .chip-b {
-        right: 30%;
-        top: 250px;
-    }
-
-    .chip-label {
-        color: #628086;
-        font-size: 8px;
-        letter-spacing: .16em;
-        text-transform: uppercase;
-    }
-
-    .chip-value {
-        margin-top: 4px;
-        color: #dffdfa;
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: 18px;
-        font-weight: 600;
-    }
-
-    /* =====================================================
-       SECTION STRUCTURE
-       ===================================================== */
+    /* ========================================================
+       INTRO / PROBLEM
+       ======================================================== */
 
     .section {
-        padding: 105px 6vw 10px;
+        padding: 105px 6vw 20px;
     }
 
-    .eyebrow {
-        color: #6fe2da;
+    .section-tag {
+        color: #237b7a;
         font-size: 10px;
         font-weight: 700;
-        letter-spacing: .25em;
+        letter-spacing: .22em;
         text-transform: uppercase;
         margin-bottom: 18px;
     }
 
-    .section-heading {
-        max-width: 920px;
+    .section-title {
+        max-width: 980px;
         font-family: 'Space Grotesk', sans-serif;
-        font-size: clamp(38px, 5vw, 68px);
+        font-size: clamp(38px, 5vw, 70px);
         line-height: .98;
         letter-spacing: -.055em;
         margin: 0;
     }
 
-    .section-heading span {
-        color: #718d91;
+    .section-title em {
+        color: #718184;
+        font-style: normal;
     }
 
-    .body-copy {
-        max-width: 720px;
-        color: #829da0;
+    .intro-copy {
+        max-width: 730px;
+        color: #617477;
         font-size: 14px;
         line-height: 1.85;
-        margin-top: 24px;
+        margin-top: 25px;
     }
 
-    /* =====================================================
-       PROBLEM STATEMENT
-       ===================================================== */
+    /* ========================================================
+       IMAGE + PROBLEM STORY
+       ======================================================== */
 
-    .problem-layout {
+    .story {
+        margin-top: 54px;
         display: grid;
-        grid-template-columns: 1.4fr .6fr;
-        gap: 22px;
-        margin-top: 50px;
-    }
-
-    .problem-main,
-    .problem-side {
-        border: 1px solid rgba(255,255,255,.09);
+        grid-template-columns: 1.1fr .9fr;
+        min-height: 530px;
         border-radius: 25px;
-        background: rgba(9,42,49,.55);
-    }
-
-    .problem-main {
-        min-height: 330px;
-        padding: 42px;
-        position: relative;
         overflow: hidden;
+        background: #0a282e;
     }
 
-    .problem-main::after {
-        content: "H₂O";
-        position: absolute;
-        right: 30px;
-        bottom: -40px;
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: 180px;
-        line-height: 1;
-        color: rgba(116,232,224,.035);
-        font-weight: 700;
+    .story-photo {
+        width: 100%;
+        height: 100%;
+        min-height: 530px;
+        object-fit: cover;
     }
 
-    .problem-quote {
-        position: relative;
-        z-index: 2;
-        max-width: 690px;
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: clamp(28px, 4vw, 51px);
-        line-height: 1.03;
-        letter-spacing: -.045em;
-    }
-
-    .problem-quote span {
-        color: #73e7df;
-    }
-
-    .problem-side {
-        padding: 32px;
+    .story-copy {
+        padding: 54px;
+        color: white;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: center;
+        background:
+            radial-gradient(circle at 90% 15%, rgba(110,225,214,.15), transparent 30%),
+            #0a282e;
     }
 
-    .side-label {
-        color: #658186;
+    .story-kicker {
+        color: #70dfd5;
         font-size: 9px;
-        letter-spacing: .18em;
+        font-weight: 700;
+        letter-spacing: .23em;
         text-transform: uppercase;
     }
 
-    .side-number {
+    .story-title {
         font-family: 'Space Grotesk', sans-serif;
-        font-size: 80px;
-        line-height: .9;
-        color: #e9fdfb;
+        font-size: clamp(31px, 4vw, 52px);
+        line-height: 1;
+        letter-spacing: -.045em;
+        margin: 20px 0;
     }
 
-    .side-text {
-        color: #789296;
-        font-size: 11px;
-        line-height: 1.7;
+    .story-title span {
+        color: #70dfd5;
     }
 
-    /* =====================================================
-       PARAMETERS
-       ===================================================== */
+    .story-text {
+        max-width: 520px;
+        color: #9bb4b6;
+        font-size: 13px;
+        line-height: 1.8;
+    }
 
-    .parameter-strip {
+    .story-foot {
+        margin-top: 35px;
+        padding-top: 18px;
+        border-top: 1px solid rgba(255,255,255,.11);
+        display: flex;
+        gap: 30px;
+    }
+
+    .story-stat strong {
+        display: block;
+        font-family: 'Space Grotesk', sans-serif;
+        color: white;
+        font-size: 26px;
+    }
+
+    .story-stat span {
+        color: #668185;
+        font-size: 9px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+    }
+
+    /* ========================================================
+       FEATURE CARDS
+       ======================================================== */
+
+    .feature-grid {
+        margin-top: 50px;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 1px;
-        margin-top: 52px;
-        background: rgba(255,255,255,.09);
-        border: 1px solid rgba(255,255,255,.09);
-        border-radius: 20px;
+        gap: 15px;
+    }
+
+    .feature-card {
+        min-height: 215px;
+        padding: 28px;
+        border: 1px solid rgba(10,23,25,.10);
+        background: #faf8f2;
+        border-radius: 18px;
+        position: relative;
         overflow: hidden;
     }
 
-    .parameter {
-        min-height: 130px;
-        padding: 25px;
-        background: #08252c;
+    .feature-card::after {
+        content: "";
+        position: absolute;
+        width: 120px;
+        height: 120px;
+        right: -50px;
+        bottom: -50px;
+        border-radius: 50%;
+        background: rgba(72,178,172,.09);
     }
 
-    .parameter-number {
-        color: #64dcd5;
+    .feature-number {
+        color: #23827f;
         font-size: 9px;
-        letter-spacing: .16em;
+        letter-spacing: .17em;
+        font-weight: 700;
     }
 
-    .parameter-name {
-        margin-top: 14px;
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: 17px;
-        color: #e6f8f6;
-    }
-
-    .parameter-desc {
-        margin-top: 6px;
-        color: #668388;
-        font-size: 10px;
-    }
-
-    /* =====================================================
-       ANALYSIS AREA
-       ===================================================== */
-
-    .analysis-shell {
-        margin-top: 55px;
-        border: 1px solid rgba(113,230,223,.15);
-        border-radius: 30px;
-        background:
-            radial-gradient(circle at 95% 10%, rgba(87,226,216,.08), transparent 25%),
-            #071f25;
-        padding: 34px;
-        box-shadow: 0 35px 90px rgba(0,0,0,.22);
-    }
-
-    .analysis-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding-bottom: 25px;
-        border-bottom: 1px solid rgba(255,255,255,.08);
-        margin-bottom: 30px;
-    }
-
-    .analysis-title {
+    .feature-name {
         font-family: 'Space Grotesk', sans-serif;
         font-size: 22px;
-        font-weight: 600;
+        margin-top: 20px;
     }
 
-    .ready {
-        border: 1px solid rgba(101,225,181,.25);
-        color: #78dfb8;
+    .feature-text {
+        color: #718083;
+        font-size: 11px;
+        line-height: 1.7;
+        margin-top: 9px;
+        max-width: 300px;
+    }
+
+    /* ========================================================
+       ANALYSIS CONSOLE
+       ======================================================== */
+
+    .console-section {
+        background: #0a242a;
+        margin-top: 110px;
+        padding: 100px 6vw 110px;
+        color: white;
+    }
+
+    .console-section .section-tag {
+        color: #75e0d7;
+    }
+
+    .console-title {
+        max-width: 900px;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(40px, 5vw, 70px);
+        line-height: .98;
+        letter-spacing: -.055em;
+        margin: 0;
+    }
+
+    .console-title span {
+        color: #6e8e92;
+    }
+
+    .console-description {
+        max-width: 680px;
+        color: #8ea8ab;
+        font-size: 13px;
+        line-height: 1.8;
+        margin-top: 22px;
+    }
+
+    .console {
+        margin-top: 48px;
+        border: 1px solid rgba(255,255,255,.10);
+        border-radius: 25px;
+        background: #0d3037;
+        padding: 31px;
+    }
+
+    .console-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 23px;
+        margin-bottom: 28px;
+        border-bottom: 1px solid rgba(255,255,255,.09);
+    }
+
+    .console-head-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 20px;
+    }
+
+    .console-status {
+        color: #74dfb8;
+        border: 1px solid rgba(116,223,184,.25);
         border-radius: 999px;
         padding: 7px 12px;
         font-size: 8px;
-        letter-spacing: .16em;
+        letter-spacing: .14em;
         text-transform: uppercase;
     }
 
     [data-testid="stNumberInput"] label {
-        color: #8da8ab !important;
+        color: #9ab5b7 !important;
         font-size: 10px !important;
-        letter-spacing: .04em;
     }
 
     [data-testid="stNumberInput"] input {
-        color: #eafffc !important;
-        background: #0b3037 !important;
+        background: #09262c !important;
+        color: #f0fffd !important;
         border: 1px solid rgba(255,255,255,.09) !important;
         border-radius: 10px !important;
     }
 
     [data-testid="stNumberInput"] input:focus {
-        border-color: rgba(110,231,223,.6) !important;
-        box-shadow: 0 0 0 1px rgba(110,231,223,.16) !important;
+        border-color: rgba(112,225,215,.65) !important;
+        box-shadow: 0 0 0 1px rgba(112,225,215,.15) !important;
     }
 
     .stButton > button {
         min-height: 58px;
-        border-radius: 12px !important;
-        border: 1px solid rgba(124,239,231,.45) !important;
-        background: #7ce9e0 !important;
-        color: #052127 !important;
+        margin-top: 18px;
+        border-radius: 11px !important;
+        border: 1px solid rgba(112,225,215,.55) !important;
+        background: #72dfd5 !important;
+        color: #062127 !important;
         font-weight: 800 !important;
-        letter-spacing: .12em;
+        letter-spacing: .11em;
         text-transform: uppercase;
-        transition: all .2s ease;
-        box-shadow: 0 16px 45px rgba(76,222,213,.12);
+        transition: .2s ease;
     }
 
     .stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 22px 55px rgba(76,222,213,.20);
+        box-shadow: 0 16px 45px rgba(91,218,208,.15);
     }
 
-    /* =====================================================
+    /* ========================================================
        RESULT
-       ===================================================== */
+       ======================================================== */
 
-    .result-section {
-        margin-top: 58px;
-    }
-
-    .result-card {
+    .result {
+        margin-top: 48px;
+        padding: 42px;
+        border-radius: 25px;
+        border: 1px solid rgba(112,225,215,.20);
+        background:
+            radial-gradient(circle at 90% 30%, rgba(112,225,215,.16), transparent 24%),
+            #0d333a;
         position: relative;
         overflow: hidden;
-        min-height: 310px;
-        border-radius: 30px;
-        padding: 45px;
-        border: 1px solid rgba(105,229,220,.22);
-        background:
-            radial-gradient(circle at 85% 35%, rgba(89,230,218,.16), transparent 25%),
-            linear-gradient(135deg, #0b3a42, #072229);
     }
 
-    .result-card.bad {
-        border-color: rgba(255,124,119,.25);
+    .result.bad {
+        border-color: rgba(231,122,112,.25);
         background:
-            radial-gradient(circle at 85% 35%, rgba(255,124,119,.13), transparent 25%),
-            linear-gradient(135deg, #3a2228, #1e171c);
+            radial-gradient(circle at 90% 30%, rgba(231,122,112,.13), transparent 24%),
+            #342328;
     }
 
     .result-label {
-        color: #6c8d91;
-        font-size: 9px;
-        letter-spacing: .22em;
-        text-transform: uppercase;
-    }
-
-    .result-title {
-        margin-top: 18px;
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: clamp(43px, 6vw, 78px);
-        line-height: .92;
-        letter-spacing: -.065em;
-        max-width: 750px;
-    }
-
-    .result-copy {
-        max-width: 650px;
-        margin-top: 22px;
-        color: #9ab5b8;
-        font-size: 13px;
-        line-height: 1.8;
-    }
-
-    .result-orb {
-        position: absolute;
-        width: 180px;
-        height: 180px;
-        right: 8%;
-        top: 65px;
-        border-radius: 50%;
-        border: 1px solid rgba(168,255,249,.18);
-        background: radial-gradient(
-            circle at 33% 28%,
-            rgba(255,255,255,.45),
-            rgba(91,226,218,.20) 18%,
-            rgba(11,74,83,.05) 62%,
-            transparent 70%
-        );
-        box-shadow:
-            inset -25px -25px 50px rgba(0,0,0,.28),
-            0 0 65px rgba(89,229,219,.10);
-    }
-
-    .bad .result-orb {
-        background: radial-gradient(
-            circle at 33% 28%,
-            rgba(255,255,255,.25),
-            rgba(255,122,117,.22) 18%,
-            rgba(88,32,40,.06) 62%,
-            transparent 70%
-        );
-        box-shadow: 0 0 65px rgba(255,100,100,.08);
-    }
-
-    .snapshot-title {
-        margin: 35px 0 14px;
-        color: #678388;
+        color: #79979b;
         font-size: 9px;
         letter-spacing: .20em;
         text-transform: uppercase;
     }
 
+    .result-title {
+        margin-top: 16px;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(43px, 6vw, 78px);
+        line-height: .92;
+        letter-spacing: -.065em;
+        color: white;
+    }
+
+    .result-copy {
+        max-width: 690px;
+        margin-top: 20px;
+        color: #9eb8ba;
+        font-size: 13px;
+        line-height: 1.8;
+    }
+
+    .result-ring {
+        position: absolute;
+        right: 8%;
+        top: 48px;
+        width: 185px;
+        height: 185px;
+        border: 1px solid rgba(115,229,220,.22);
+        border-radius: 50%;
+        box-shadow:
+            inset 0 0 0 18px rgba(112,225,215,.025),
+            0 0 0 28px rgba(112,225,215,.025);
+    }
+
+    .bad .result-ring {
+        border-color: rgba(231,122,112,.25);
+        box-shadow:
+            inset 0 0 0 18px rgba(231,122,112,.025),
+            0 0 0 28px rgba(231,122,112,.025);
+    }
+
+    /* ========================================================
+       SNAPSHOT + PROCESS
+       ======================================================== */
+
+    .snapshot-label {
+        margin: 32px 0 14px;
+        color: #789396;
+        font-size: 9px;
+        letter-spacing: .17em;
+        text-transform: uppercase;
+    }
+
     [data-testid="stMetric"] {
-        background: #09262d;
+        background: #09262c;
         border: 1px solid rgba(255,255,255,.07);
-        border-radius: 12px;
-        padding: 12px !important;
+        border-radius: 11px;
+        padding: 11px !important;
     }
 
     [data-testid="stMetricLabel"] {
-        color: #6c898d !important;
-        font-size: 9px !important;
+        color: #6f898d !important;
+        font-size: 8px !important;
     }
 
     [data-testid="stMetricValue"] {
-        color: #e7fbf9 !important;
-        font-size: 19px !important;
+        color: #e7fbf8 !important;
+        font-size: 18px !important;
     }
 
-    /* =====================================================
-       PROCESS
-       ===================================================== */
-
-    .process {
-        display: grid;
-        grid-template-columns: 1fr 50px 1fr 50px 1fr;
-        align-items: center;
+    .process-grid {
         margin-top: 48px;
+        display: grid;
+        grid-template-columns: 1fr 40px 1fr 40px 1fr;
+        gap: 10px;
+        align-items: center;
     }
 
     .process-card {
-        border: 1px solid rgba(255,255,255,.08);
-        border-radius: 19px;
-        background: #09252c;
-        padding: 26px;
-        min-height: 170px;
+        padding: 28px;
+        min-height: 180px;
+        background: #faf8f2;
+        border: 1px solid rgba(10,23,25,.09);
+        border-radius: 18px;
     }
 
     .process-num {
-        color: #69ded6;
+        color: #2a8581;
         font-size: 9px;
-        letter-spacing: .18em;
+        letter-spacing: .17em;
+        font-weight: 700;
     }
 
     .process-card h3 {
         font-family: 'Space Grotesk', sans-serif;
-        margin: 16px 0 8px;
         font-size: 21px;
+        margin: 15px 0 8px;
     }
 
     .process-card p {
-        color: #708b8f;
+        color: #718083;
         font-size: 11px;
         line-height: 1.7;
         margin: 0;
     }
 
     .process-arrow {
-        color: #47767b;
         text-align: center;
+        color: #2c8884;
         font-size: 22px;
     }
 
-    /* =====================================================
+    /* ========================================================
        FOOTER
-       ===================================================== */
+       ======================================================== */
 
     .footer {
-        margin: 105px 6vw 0;
-        padding-top: 22px;
-        border-top: 1px solid rgba(255,255,255,.08);
+        margin: 90px 6vw 0;
+        padding-top: 20px;
+        border-top: 1px solid rgba(10,23,25,.12);
         display: flex;
         justify-content: space-between;
-        gap: 20px;
-        color: #506d71;
+        color: #718083;
         font-size: 9px;
         letter-spacing: .16em;
         text-transform: uppercase;
     }
 
-    /* =====================================================
-       RESPONSIVE
-       ===================================================== */
-
-    @media (max-width: 950px) {
-        .hero {
-            min-height: 650px;
-        }
-
-        .hero::after {
-            width: 390px;
-            height: 390px;
-            right: -130px;
-        }
-
-        .problem-layout {
-            grid-template-columns: 1fr;
-        }
-
-        .parameter-strip {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .process {
-            grid-template-columns: 1fr;
-            gap: 12px;
-        }
-
-        .process-arrow {
-            display: none;
-        }
-
-        .result-orb {
-            opacity: .3;
-        }
+    @media (max-width: 900px) {
+        .hero { min-height: 650px; }
+        .story { grid-template-columns: 1fr; }
+        .story-photo { min-height: 380px; }
+        .feature-grid { grid-template-columns: 1fr; }
+        .process-grid { grid-template-columns: 1fr; }
+        .process-arrow { display: none; }
+        .result-ring { opacity: .25; }
     }
 
-    @media (max-width: 620px) {
-        .hero {
-            min-height: 650px;
-            padding: 24px 22px 38px;
-        }
-
-        .top-status {
-            display: none;
-        }
-
-        .hero-title {
-            font-size: 59px;
-        }
-
-        .hero-content {
-            margin-top: 65px;
-        }
-
-        .chip-b {
-            display: none;
-        }
-
-        .chip-a {
-            right: 7%;
-            bottom: 105px;
-        }
-
-        .section {
-            padding-left: 22px;
-            padding-right: 22px;
-        }
-
-        .parameter-strip {
-            grid-template-columns: 1fr;
-        }
-
-        .problem-main,
-        .problem-side,
-        .analysis-shell,
-        .result-card {
-            padding: 25px;
-        }
-
-        .result-orb {
-            display: none;
-        }
-
+    @media (max-width: 600px) {
+        .nav-wrap { padding: 0 20px; }
+        .nav-right { display: none; }
+        .hero-content { padding: 75px 22px 55px; }
+        .hero-title { font-size: 59px; }
+        .hero-side { display: none; }
+        .section { padding-left: 22px; padding-right: 22px; }
+        .story-copy { padding: 30px; }
+        .console-section { padding-left: 22px; padding-right: 22px; }
+        .console { padding: 22px; }
+        .result { padding: 27px; }
+        .result-ring { display: none; }
         .footer {
             margin-left: 22px;
             margin-right: 22px;
             flex-direction: column;
+            gap: 8px;
         }
     }
     </style>
@@ -763,237 +712,315 @@ st.markdown(
 )
 
 
-# ---------------------------------------------------------
-# HERO
-# ---------------------------------------------------------
-st.markdown(
+# ------------------------------------------------------------
+# NAV
+# ------------------------------------------------------------
+st.html(
     """
-    <section class="hero">
-
-        <div class="topbar">
-            <div class="logo">
-                <div class="logo-dot">≈</div>
-                AQUA
-            </div>
-
-            <div class="top-status">
-                Water Quality Intelligence / SVM System
-            </div>
+    <div class="nav-wrap">
+        <div class="brand">
+            <div class="brand-mark">≈</div>
+            AQUA
         </div>
 
-        <div class="hero-content">
-            <div class="hero-kicker">
-                Machine learning · water analysis · classification
-            </div>
-
-            <h1 class="hero-title">
-                WATER<br>
-                <span class="outline">IS</span>
-                <span class="aqua">DATA.</span>
-            </h1>
-
-            <p class="hero-description">
-                Water can appear clear and still contain a complex combination
-                of measurable properties. AQUA transforms nine water-quality
-                measurements into a machine-learning classification using the
-                trained Support Vector Machine model behind this project.
-            </p>
+        <div class="nav-right">
+            <span>Water quality</span>
+            <span>Machine learning</span>
+            <span>SVM analysis</span>
         </div>
-
-        <div class="data-chip chip-b">
-            <div class="chip-label">Input vector</div>
-            <div class="chip-value">09 features</div>
-        </div>
-
-        <div class="data-chip chip-a">
-            <div class="chip-label">Model engine</div>
-            <div class="chip-value">SVM / ML</div>
-        </div>
-
-        <div class="hero-bottom">
-            <div class="scroll-note">↓ Enter a water profile below</div>
-
-            <div class="hero-index">
-                PROJECT <strong>01</strong> / POTABILITY
-            </div>
-        </div>
-
-    </section>
-    """,
-    unsafe_allow_html=True,
+    </div>
+    """
 )
 
 
-# ---------------------------------------------------------
-# PROBLEM STATEMENT
-# ---------------------------------------------------------
-st.markdown(
+# ------------------------------------------------------------
+# HERO IMAGE
+# ------------------------------------------------------------
+if HERO_IMAGE.exists():
+    hero_uri = image_data_uri(HERO_IMAGE)
+    st.html(
+        f"""
+        <section class="hero">
+            <img class="hero-photo" src="{hero_uri}" alt="Water quality testing">
+            <div class="hero-overlay"></div>
+
+            <div class="hero-content">
+                <div class="hero-eyebrow">
+                    Water quality analysis / machine learning
+                </div>
+
+                <h1 class="hero-title">
+                    KNOW THE<br>
+                    <span class="thin">WATER.</span><br>
+                    <span class="accent">BEYOND</span><br>
+                    APPEARANCE.
+                </h1>
+
+                <p class="hero-copy">
+                    A project that uses nine measurable water-quality
+                    parameters and a trained Support Vector Machine to
+                    classify the supplied sample into the two classes used
+                    by the prediction system.
+                </p>
+
+                <div class="hero-rule"></div>
+
+                <div class="hero-meta">
+                    <div class="hero-meta-item">
+                        <strong>09</strong>
+                        parameters
+                    </div>
+
+                    <div class="hero-meta-item">
+                        <strong>SVM</strong>
+                        classifier
+                    </div>
+
+                    <div class="hero-meta-item">
+                        <strong>01 → 0</strong>
+                        output classes
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-side">
+                Measure · Analyse · Classify
+            </div>
+        </section>
+        """
+    )
+else:
+    st.error("Hero image missing. Keep assets/water_testing_hero.jpg beside app.py.")
+
+
+# ------------------------------------------------------------
+# INTRO
+# ------------------------------------------------------------
+st.html(
     """
     <section class="section">
 
-        <div class="eyebrow">01 / The problem</div>
+        <div class="section-tag">01 / The reason</div>
 
-        <h2 class="section-heading">
-            Clear water does not automatically mean
-            <span>safe water.</span>
+        <h2 class="section-title">
+            Water is essential.<br>
+            <em>Its quality is a data problem.</em>
         </h2>
 
-        <p class="body-copy">
-            Water quality is influenced by multiple measurable characteristics.
-            Looking at one value alone does not describe the complete sample.
-            This project uses a trained Support Vector Machine to evaluate the
-            combined input profile and classify the sample into the two output
-            classes used by the application.
+        <p class="intro-copy">
+            A sample can look clear without telling the complete story.
+            Water quality is influenced by several measurable chemical and
+            physical properties. This project brings those measurements
+            together and uses machine learning to produce a consistent
+            classification from the complete input profile.
         </p>
 
-        <div class="problem-layout">
-
-            <div class="problem-main">
-                <div class="problem-quote">
-                    Instead of asking
-                    <span>"Does the water look clean?"</span>
-                    the system asks:
-                    <span>"What does the data say?"</span>
-                </div>
-            </div>
-
-            <div class="problem-side">
-                <div class="side-label">Parameters observed</div>
-
-                <div class="side-number">09</div>
-
-                <div class="side-text">
-                    pH · Hardness · Solids · Chloramines · Sulfate ·
-                    Conductivity · Organic Carbon · Trihalomethanes ·
-                    Turbidity
-                </div>
-            </div>
-
-        </div>
-
     </section>
-    """,
-    unsafe_allow_html=True,
+    """
 )
 
 
-# ---------------------------------------------------------
+# ------------------------------------------------------------
+# STORY IMAGE + PROBLEM
+# ------------------------------------------------------------
+if PROBLEM_IMAGE.exists():
+    problem_uri = image_data_uri(PROBLEM_IMAGE)
+
+    st.html(
+        f"""
+        <section class="section" style="padding-top:35px;">
+
+            <div class="story">
+
+                <img
+                    class="story-photo"
+                    src="{problem_uri}"
+                    alt="Person drinking water"
+                >
+
+                <div class="story-copy">
+
+                    <div class="story-kicker">
+                        The real-world question
+                    </div>
+
+                    <div class="story-title">
+                        Can we make the
+                        <span>invisible</span>
+                        measurable?
+                    </div>
+
+                    <div class="story-text">
+                        Water quality cannot be understood from appearance
+                        alone. A machine-learning system can combine several
+                        measured properties and learn a classification pattern
+                        from historical water-quality data.
+                        <br><br>
+                        That is the idea behind this project:
+                        turn a water sample into a structured feature vector,
+                        pass it through the trained SVM model, and return the
+                        corresponding class.
+                    </div>
+
+                    <div class="story-foot">
+                        <div class="story-stat">
+                            <strong>09</strong>
+                            <span>measured features</span>
+                        </div>
+
+                        <div class="story-stat">
+                            <strong>SVM</strong>
+                            <span>learning model</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+        """
+    )
+
+
+# ------------------------------------------------------------
 # FEATURE MAP
-# ---------------------------------------------------------
-st.markdown(
+# ------------------------------------------------------------
+st.html(
     """
-    <section class="section" style="padding-top:55px;">
+    <section class="section" style="padding-top:90px;">
 
-        <div class="eyebrow">02 / What the model sees</div>
+        <div class="section-tag">02 / The water profile</div>
 
-        <h2 class="section-heading">
-            Nine measurements.<br>
-            <span>One water profile.</span>
+        <h2 class="section-title">
+            One sample.<br>
+            <em>Nine signals.</em>
         </h2>
 
-        <div class="parameter-strip">
+        <div class="feature-grid">
 
-            <div class="parameter">
-                <div class="parameter-number">01 / CHEMISTRY</div>
-                <div class="parameter-name">pH Level</div>
-                <div class="parameter-desc">Acidity / alkalinity input</div>
+            <div class="feature-card">
+                <div class="feature-number">01 / CHEMISTRY</div>
+                <div class="feature-name">pH Level</div>
+                <div class="feature-text">
+                    Acidity / alkalinity measurement supplied to the model.
+                </div>
             </div>
 
-            <div class="parameter">
-                <div class="parameter-number">02 / COMPOSITION</div>
-                <div class="parameter-name">Hardness</div>
-                <div class="parameter-desc">Dissolved mineral characteristic</div>
+            <div class="feature-card">
+                <div class="feature-number">02 / COMPOSITION</div>
+                <div class="feature-name">Hardness</div>
+                <div class="feature-text">
+                    Dissolved mineral characteristic of the sample.
+                </div>
             </div>
 
-            <div class="parameter">
-                <div class="parameter-number">03 / SOLIDS</div>
-                <div class="parameter-name">Solids</div>
-                <div class="parameter-desc">Total dissolved solids input</div>
+            <div class="feature-card">
+                <div class="feature-number">03 / SOLIDS</div>
+                <div class="feature-name">Solids</div>
+                <div class="feature-text">
+                    Total dissolved-solids measurement.
+                </div>
             </div>
 
-            <div class="parameter">
-                <div class="parameter-number">04 / TREATMENT</div>
-                <div class="parameter-name">Chloramines</div>
-                <div class="parameter-desc">Disinfection-related measurement</div>
+            <div class="feature-card">
+                <div class="feature-number">04 / TREATMENT</div>
+                <div class="feature-name">Chloramines</div>
+                <div class="feature-text">
+                    Disinfection-related input used by the model.
+                </div>
             </div>
 
-            <div class="parameter">
-                <div class="parameter-number">05 / MINERALS</div>
-                <div class="parameter-name">Sulfate</div>
-                <div class="parameter-desc">Chemical composition input</div>
+            <div class="feature-card">
+                <div class="feature-number">05 / MINERALS</div>
+                <div class="feature-name">Sulfate</div>
+                <div class="feature-text">
+                    Chemical composition measurement.
+                </div>
             </div>
 
-            <div class="parameter">
-                <div class="parameter-number">06 / ELECTRICAL</div>
-                <div class="parameter-name">Conductivity</div>
-                <div class="parameter-desc">Electrical conductivity input</div>
+            <div class="feature-card">
+                <div class="feature-number">06 / ELECTRICAL</div>
+                <div class="feature-name">Conductivity</div>
+                <div class="feature-text">
+                    Electrical conductivity of the water profile.
+                </div>
             </div>
 
-            <div class="parameter">
-                <div class="parameter-number">07 / ORGANIC</div>
-                <div class="parameter-name">Organic Carbon</div>
-                <div class="parameter-desc">Organic-content measurement</div>
+            <div class="feature-card">
+                <div class="feature-number">07 / ORGANIC</div>
+                <div class="feature-name">Organic Carbon</div>
+                <div class="feature-text">
+                    Organic-content measurement.
+                </div>
             </div>
 
-            <div class="parameter">
-                <div class="parameter-number">08 / DISINFECTION</div>
-                <div class="parameter-name">Trihalomethanes</div>
-                <div class="parameter-desc">THM measurement</div>
+            <div class="feature-card">
+                <div class="feature-number">08 / DISINFECTION</div>
+                <div class="feature-name">Trihalomethanes</div>
+                <div class="feature-text">
+                    THM measurement supplied to the classifier.
+                </div>
             </div>
 
-            <div class="parameter">
-                <div class="parameter-number">09 / PHYSICAL</div>
-                <div class="parameter-name">Turbidity</div>
-                <div class="parameter-desc">Water clarity measurement</div>
+            <div class="feature-card">
+                <div class="feature-number">09 / PHYSICAL</div>
+                <div class="feature-name">Turbidity</div>
+                <div class="feature-text">
+                    Water clarity measurement.
+                </div>
             </div>
 
         </div>
-
     </section>
-    """,
-    unsafe_allow_html=True,
+    """
 )
 
 
-# ---------------------------------------------------------
+# ------------------------------------------------------------
 # ANALYSIS CONSOLE
-# ---------------------------------------------------------
-st.markdown(
+# ------------------------------------------------------------
+st.html(
     """
-    <section class="section" style="padding-top:95px;">
+    <section class="console-section">
 
-        <div class="eyebrow">03 / Live analysis</div>
+        <div class="section-tag">03 / Live analysis</div>
 
-        <h2 class="section-heading">
+        <h2 class="console-title">
             Give the model<br>
-            <span>a sample to read.</span>
+            <span>a water profile.</span>
         </h2>
 
-        <p class="body-copy">
-            Enter the same nine numerical parameters used by your original
-            application. The model receives them in the original feature order.
+        <p class="console-description">
+            Enter the nine numerical measurements used by the original
+            application. The values are passed to the trained SVM in the
+            same feature order as the existing project.
         </p>
 
-        <div class="analysis-shell">
+        <div class="console">
 
-            <div class="analysis-head">
-                <div class="analysis-title">Water profile / input console</div>
-                <div class="ready">● Model loaded</div>
+            <div class="console-head">
+                <div class="console-head-title">
+                    Sample analysis console
+                </div>
+
+                <div class="console-status">
+                    ● Model loaded
+                </div>
             </div>
 
         </div>
+
     </section>
-    """,
-    unsafe_allow_html=True,
+    """
 )
 
 
-# ---------------------------------------------------------
-# ORIGINAL INPUTS — SAME FEATURES, NEW PRESENTATION
-# ---------------------------------------------------------
-col1, col2, col3 = st.columns(3)
+# ------------------------------------------------------------
+# ORIGINAL INPUTS — SAME VALUES / SAME ORDER
+# ------------------------------------------------------------
+c1, c2, c3 = st.columns(3)
 
-with col1:
+with c1:
     ph = st.number_input(
         "pH Level",
         min_value=0.0,
@@ -1016,7 +1043,7 @@ with col1:
         step=100.0,
     )
 
-with col2:
+with c2:
     Chloramines = st.number_input(
         "Chloramines",
         min_value=0.0,
@@ -1038,7 +1065,7 @@ with col2:
         step=1.0,
     )
 
-with col3:
+with c3:
     Organic_carbon = st.number_input(
         "Organic Carbon",
         min_value=0.0,
@@ -1061,9 +1088,9 @@ with col3:
     )
 
 
-# ---------------------------------------------------------
+# ------------------------------------------------------------
 # PREDICTION
-# ---------------------------------------------------------
+# ------------------------------------------------------------
 if st.button("Analyze Water Quality", use_container_width=True):
 
     input_data = np.array([[
@@ -1080,28 +1107,30 @@ if st.button("Analyze Water Quality", use_container_width=True):
 
     prediction = model.predict(input_data)
 
-    if prediction[0] == 1:
+    is_safe = prediction[0] == 1
+
+    if is_safe:
         result = "Safe to Drink"
-        result_class = "good"
+        result_class = ""
         description = (
-            "The trained SVM classified this parameter profile as the "
-            "positive class used by the current application."
+            "The trained SVM classified this supplied parameter profile "
+            "as the positive class used by the current application."
         )
     else:
         result = "Not Safe to Drink"
         result_class = "bad"
         description = (
-            "The trained SVM classified this parameter profile as the "
-            "negative class used by the current application."
+            "The trained SVM classified this supplied parameter profile "
+            "as the negative class used by the current application."
         )
 
-    st.markdown(
+    st.html(
         f"""
-        <section class="section result-section">
+        <section class="console-section" style="padding-top:25px;">
 
-            <div class="eyebrow">04 / Model output</div>
+            <div class="section-tag">04 / Model output</div>
 
-            <div class="result-card {"" if result_class == "good" else "bad"}">
+            <div class="result {result_class}">
 
                 <div class="result-label">
                     SVM classification / current sample
@@ -1114,23 +1143,23 @@ if st.button("Analyze Water Quality", use_container_width=True):
                 <div class="result-copy">
                     {description}
                     <br><br>
-                    This result is a machine-learning prediction from the
-                    trained project model. It is not a laboratory test,
-                    medical recommendation, or regulatory certification.
+                    This is a machine-learning prediction from the trained
+                    project model. It is not a laboratory test or regulatory
+                    certification.
                 </div>
 
-                <div class="result-orb"></div>
+                <div class="result-ring"></div>
 
             </div>
 
-            <div class="snapshot-title">Input snapshot / values sent to model</div>
+            <div class="snapshot-label">
+                Input snapshot / values sent to the model
+            </div>
 
         </section>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
-    # Snapshot of exactly what was sent to the model
     snapshot = [
         ("pH", ph),
         ("Hardness", Hardness),
@@ -1150,70 +1179,67 @@ if st.button("Analyze Water Quality", use_container_width=True):
             st.metric(label, f"{value:g}")
 
 
-# ---------------------------------------------------------
-# MODEL FLOW
-# ---------------------------------------------------------
-st.markdown(
+# ------------------------------------------------------------
+# MODEL PIPELINE
+# ------------------------------------------------------------
+st.html(
     """
     <section class="section">
 
-        <div class="eyebrow">05 / The intelligence layer</div>
+        <div class="section-tag">05 / The intelligence</div>
 
-        <h2 class="section-heading">
-            From raw measurements<br>
-            <span>to a model decision.</span>
+        <h2 class="section-title">
+            Measure.<br>
+            <em>Classify.</em>
         </h2>
 
-        <div class="process">
+        <div class="process-grid">
 
             <div class="process-card">
                 <div class="process-num">01 / INPUT</div>
                 <h3>Water profile</h3>
                 <p>
-                    Nine numerical measurements are collected from the
-                    supplied water sample.
+                    Nine numerical measurements describe the supplied sample.
                 </p>
             </div>
 
             <div class="process-arrow">→</div>
 
             <div class="process-card">
-                <div class="process-num">02 / CLASSIFIER</div>
-                <h3>SVM model</h3>
+                <div class="process-num">02 / MODEL</div>
+                <h3>SVM classifier</h3>
                 <p>
-                    The serialized Support Vector Machine evaluates the
-                    complete feature vector.
+                    The serialized Support Vector Machine receives the complete
+                    feature vector and predicts its learned class.
                 </p>
             </div>
 
             <div class="process-arrow">→</div>
 
             <div class="process-card">
-                <div class="process-num">03 / DECISION</div>
-                <h3>Classification</h3>
+                <div class="process-num">03 / OUTPUT</div>
+                <h3>Decision</h3>
                 <p>
-                    The prediction is mapped to the two output labels used
-                    by the original application.
+                    The numeric prediction is mapped to the application's
+                    Safe to Drink or Not Safe to Drink result.
                 </p>
             </div>
 
         </div>
 
     </section>
-    """,
-    unsafe_allow_html=True,
+    """
 )
 
 
-# ---------------------------------------------------------
+# ------------------------------------------------------------
 # FOOTER
-# ---------------------------------------------------------
-st.markdown(
+# ------------------------------------------------------------
+st.html(
     """
     <div class="footer">
-        <span>AQUA // WATER QUALITY INTELLIGENCE</span>
-        <span>09 parameters · SVM classification · ML project</span>
+        <span>AQUA / Water Quality Analysis</span>
+        <span>09 parameters · SVM classification · Machine learning project</span>
     </div>
-    """,
-    unsafe_allow_html=True,
+    """
 )
