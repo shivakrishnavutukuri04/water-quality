@@ -37,6 +37,9 @@ def image_data_uri(path: Path) -> str:
 with open(BASE_DIR / "svm_water_quality_model.pkl", "rb") as model_file:
     model = pickle.load(model_file)
 
+with open(BASE_DIR / "water_quality_scaler.pkl", "rb") as scaler_file:
+    scaler = pickle.load(scaler_file)
+
 
 # ------------------------------------------------------------
 # GLOBAL DESIGN
@@ -723,7 +726,6 @@ st.html(
             HYDROPREDICT
         </div>
 
-
         <div class="nav-right">
             <span>Water quality</span>
             <span>Machine learning</span>
@@ -1106,7 +1108,8 @@ if st.button("Analyze Water Quality", use_container_width=True):
         Turbidity,
     ]])
 
-    prediction = model.predict(input_data)
+    scaled_input = scaler.transform(input_data)
+    prediction = model.predict(scaled_input)
 
     is_safe = prediction[0] == 1
 
@@ -1244,4 +1247,3 @@ st.html(
     </div>
     """
 )
-
