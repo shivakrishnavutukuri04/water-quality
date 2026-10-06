@@ -13,7 +13,7 @@ from pathlib import Path
 # ============================================================
 
 st.set_page_config(
-    page_title="AQUA — Water Quality Analysis",
+    page_title="HYDROPREDICT — Water Quality Prediction",
     page_icon="💧",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -720,8 +720,9 @@ st.html(
     <div class="nav-wrap">
         <div class="brand">
             <div class="brand-mark">≈</div>
-            AQUA
+            HYDROPREDICT
         </div>
+
 
         <div class="nav-right">
             <span>Water quality</span>
@@ -1238,8 +1239,9 @@ st.html(
 st.html(
     """
     <div class="footer">
-        <span>AQUA / Water Quality Analysis</span>
+        <span>HYDROPREDICT / Water Quality Prediction</span>
         <span>09 parameters · SVM classification · Machine learning project</span>
     </div>
     """
 )
+
